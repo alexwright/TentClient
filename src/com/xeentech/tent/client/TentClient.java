@@ -19,9 +19,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
+import com.xeentech.tent.model.Account;
 import com.xeentech.tent.model.AppInfo;
 import com.xeentech.tent.model.AuthorizationRequest;
 import com.xeentech.tent.model.AuthorizationResponse;
+import com.xeentech.tent.model.Post;
 import com.xeentech.tent.model.Profile;
 
 import android.net.Uri;
@@ -111,6 +113,35 @@ public class TentClient {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public void post (Account account, Post post) throws TentClientException {
+		String postsUri = Uri.parse(account.serverUrl).buildUpon()
+				.appendPath("posts")
+				.build().toString();
+		
+		HttpPost req = new HttpPost(postsUri);
+		req.setHeader("Content-Type", TENT_MIME);
+		req.setHeader("Accept", TENT_MIME);
+
+		OAuth2.sign(req, account.macId, account.macKey);
+		
+		try {
+			req.setEntity(new StringEntity(new Gson().toJson(post)));
+		} catch (UnsupportedEncodingException e) {
+			throw new TentClientException("Error encoding post json", e);
+		}
+		
+		HttpResponse res;
+		String resBody;
+		try {
+			res = getHttpClient().execute(req);
+			resBody = responseToString(res);
+		} catch (IOException e) {
+			throw new TentClientException("Error making http request", e);
+		}
+		
+		Log.d("tent-client", "post made: " + resBody);
 	}
 	
 	@SuppressWarnings("serial")
