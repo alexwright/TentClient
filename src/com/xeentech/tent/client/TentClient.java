@@ -14,6 +14,10 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +29,7 @@ import com.xeentech.tent.model.AuthorizationRequest;
 import com.xeentech.tent.model.AuthorizationResponse;
 import com.xeentech.tent.model.Post;
 import com.xeentech.tent.model.Profile;
+import com.xeentech.tent.model.UploadAttachment;
 
 import android.net.Uri;
 import android.util.Log;
@@ -139,6 +144,51 @@ public class TentClient {
 			resBody = responseToString(res);
 		} catch (IOException e) {
 			throw new TentClientException("Error making http request", e);
+		}
+		
+		try {
+			Post createdPost = new Gson().fromJson(resBody, Post.class);
+			return createdPost;
+		}
+		catch (JsonSyntaxException e) {
+			throw new TentClientException("Error parsing response from Tent server", e);
+		}
+	}
+	
+	public Post multipartPost (Account account, Post post, List<UploadAttachment> uploads) throws TentClientException {
+		String postsUri = Uri.parse(account.serverUrl).buildUpon()
+				.appendPath("posts")
+				.build().toString();
+
+		String jsonPost = new Gson().toJson(post);
+		ContentBody postPart = new ByteArrayBody(jsonPost.getBytes(), TENT_MIME, "post.json");
+
+		MultipartEntity requestEntity = new MultipartEntity();
+		requestEntity.addPart("post", postPart);
+		
+		int photoCount = 0;
+		for (UploadAttachment upload : uploads) {
+			if (upload.mimeType.startsWith("image/")) {
+				FileBody image = new FileBody(upload.file, upload.filename, upload.mimeType, null);
+				requestEntity.addPart("photos[" + photoCount + "]", image);
+				photoCount++;
+			}
+		}
+
+		HttpPost req = new HttpPost(postsUri);
+		req.setHeader("Accept", TENT_MIME);
+		req.setEntity(requestEntity);
+
+		OAuth2.sign(req, account.macId, account.macKey);
+		
+		HttpResponse res;
+		String resBody;
+		try {
+			res = getHttpClient().execute(req);
+			resBody = responseToString(res);
+		}
+		catch (IOException e) {
+			throw new TentClientException("api error", e);
 		}
 		
 		try {

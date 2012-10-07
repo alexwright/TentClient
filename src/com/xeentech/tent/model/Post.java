@@ -12,6 +12,7 @@ public class Post {
 	public long published_at;
 	
 	public Map<String, Object> content;
+	public List<Attachment> attachments;
 	
 	public static final String TENT_POST_TYPE_STATUS = "https://tent.io/types/post/status/v0.1.0";
 	public static final String TENT_POST_TYPE_ESSAY = "https://tent.io/types/post/essay/v0.1.0";
