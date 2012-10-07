@@ -23,6 +23,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.xeentech.tent.model.Account;
 import com.xeentech.tent.model.AppInfo;
 import com.xeentech.tent.model.AuthorizationRequest;
@@ -221,6 +224,32 @@ public class TentClient {
 			throw new TentClientException("Error parsing response from Tent server", e);
 		}
 	}
+	
+	public List<Post> getPosts(Account account) throws TentClientException {
+		String postsUri = Uri.parse(account.serverUrl).buildUpon()
+				.appendPath("posts")
+				.build().toString();
+		
+		HttpGet req = new HttpGet(postsUri);
+		OAuth2.sign(req, account.macId, account.macKey);
+		
+		try {
+			HttpResponse res = getHttpClient().execute(req);
+			String resBody = responseToString(res);
+			
+			Gson gson = new Gson();
+			JsonParser parser = new JsonParser();
+			JsonArray jPosts = parser.parse(resBody).getAsJsonArray();
+			
+			List<Post> posts = new ArrayList<Post>();
+			for (int i=0,c=jPosts.size(); i<c; i++) {
+				Post p = gson.fromJson(jPosts.get(i), Post.class);
+				posts.add(p);
+			}
+			return posts;
+		} catch (IOException e) {
+			throw new TentClientException("Api error getting posts", e);
+		}
 	}
 	
 	@SuppressWarnings("serial")
