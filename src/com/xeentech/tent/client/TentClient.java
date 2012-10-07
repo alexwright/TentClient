@@ -120,6 +120,28 @@ public class TentClient {
 		return null;
 	}
 	
+	public Profile getProfile(Account account) throws TentClientException {
+		String profileUri = Uri.parse(account.serverUrl).buildUpon()
+				.appendPath("profile")
+				.build().toString();
+		
+		HttpGet req = new HttpGet(profileUri);
+		req.setHeader("Accept", TENT_MIME);
+		OAuth2.sign(req, account.macId, account.macKey);
+
+		try {
+			HttpResponse res = getHttpClient().execute(req);
+			String resBody = responseToString(res);
+			JSONObject profileJson = new JSONObject(resBody);
+			return Profile.fromJsonObject(profileJson);
+		}
+		catch (IOException e) {
+			throw new TentClientException("Error making http request", e);
+		} catch (JSONException e) {
+			throw new TentClientException("Error parsing server's response", e);
+		}
+	}
+	
 	public Post post (Account account, Post post) throws TentClientException {
 		String postsUri = Uri.parse(account.serverUrl).buildUpon()
 				.appendPath("posts")
