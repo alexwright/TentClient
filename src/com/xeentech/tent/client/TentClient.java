@@ -115,7 +115,7 @@ public class TentClient {
 		return null;
 	}
 	
-	public void post (Account account, Post post) throws TentClientException {
+	public Post post (Account account, Post post) throws TentClientException {
 		String postsUri = Uri.parse(account.serverUrl).buildUpon()
 				.appendPath("posts")
 				.build().toString();
@@ -141,7 +141,14 @@ public class TentClient {
 			throw new TentClientException("Error making http request", e);
 		}
 		
-		Log.d("tent-client", "post made: " + resBody);
+		try {
+			Post createdPost = new Gson().fromJson(resBody, Post.class);
+			return createdPost;
+		}
+		catch (JsonSyntaxException e) {
+			throw new TentClientException("Error parsing response from Tent server", e);
+		}
+	}
 	}
 	
 	@SuppressWarnings("serial")
