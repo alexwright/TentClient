@@ -254,10 +254,10 @@ public class TentClient {
 	}
 	
 	public List<Following> getFollowings (Account account) throws TentClientException {
-		String postsUri = Uri.parse(account.serverUrl).buildUpon()
+		String followingsUri = Uri.parse(account.serverUrl).buildUpon()
 				.appendPath("followings")
 				.build().toString();
-		HttpGet req = new HttpGet(postsUri);
+		HttpGet req = new HttpGet(followingsUri);
 		
 		JsonReader reader = signRequestAndGetReader(req, account);
 		JsonArray jFollowing = new JsonParser().parse(reader).getAsJsonArray();
@@ -272,10 +272,10 @@ public class TentClient {
 	}
 	
 	public List<Follower> getFollowers (Account account) throws TentClientException {
-		String postsUri = Uri.parse(account.serverUrl).buildUpon()
+		String followersUri = Uri.parse(account.serverUrl).buildUpon()
 				.appendPath("followers")
 				.build().toString();
-		HttpGet req = new HttpGet(postsUri);
+		HttpGet req = new HttpGet(followersUri);
 		
 		JsonReader reader = signRequestAndGetReader(req, account);
 		JsonArray jFollowers = new JsonParser().parse(reader).getAsJsonArray();
