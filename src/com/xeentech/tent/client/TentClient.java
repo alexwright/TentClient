@@ -30,6 +30,7 @@ import com.xeentech.tent.model.Account;
 import com.xeentech.tent.model.AppInfo;
 import com.xeentech.tent.model.AuthorizationRequest;
 import com.xeentech.tent.model.AuthorizationResponse;
+import com.xeentech.tent.model.Following;
 import com.xeentech.tent.model.Post;
 import com.xeentech.tent.model.Profile;
 import com.xeentech.tent.model.UploadAttachment;
@@ -247,6 +248,34 @@ public class TentClient {
 				posts.add(p);
 			}
 			return posts;
+		} catch (IOException e) {
+			throw new TentClientException("Api error getting posts", e);
+		}
+	}
+	
+	public List<Following> getFollowings (Account account) throws TentClientException {
+		String postsUri = Uri.parse(account.serverUrl).buildUpon()
+				.appendPath("followings")
+				.build().toString();
+		
+		HttpGet req = new HttpGet(postsUri);
+		req.setHeader("Accept", TENT_MIME);
+		OAuth2.sign(req, account.macId, account.macKey);
+		
+		try {
+			HttpResponse res = getHttpClient().execute(req);
+			String resBody = responseToString(res);
+			
+			Gson gson = new Gson();
+			JsonParser parser = new JsonParser();
+			JsonArray jFollowing = parser.parse(resBody).getAsJsonArray();
+			
+			List<Following> following = new ArrayList<Following>();
+			for (int i=0,c=jFollowing.size(); i<c; i++) {
+				Following f = gson.fromJson(jFollowing.get(i), Following.class);
+				following.add(f);
+			}
+			return following;
 		} catch (IOException e) {
 			throw new TentClientException("Api error getting posts", e);
 		}
