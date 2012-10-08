@@ -12,6 +12,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -267,6 +268,29 @@ public class TentClient {
 			following.add(f);
 		}
 		return following;
+	}
+	
+	public Following follow (Account account, Following following) throws TentClientException {
+		String followingsUri = Uri.parse(account.serverUrl).buildUpon()
+				.appendPath("followings")
+				.build().toString();
+		
+		HttpPost req = new HttpPost(followingsUri);
+		req.setHeader("Content-Type", TENT_MIME);
+		req.setEntity(gsonStringEntity(following));
+		
+		JsonReader reader = signRequestAndGetReader(req, account);
+		return new Gson().fromJson(reader, Following.class);
+	}
+	
+	public void unfollow (Account account, String followingId) throws TentClientException {
+		String followingUri = Uri.parse(account.serverUrl).buildUpon()
+				.appendPath("followings")
+				.appendPath(followingId)
+				.build().toString();
+		
+		HttpDelete req = new HttpDelete(followingUri);
+		HttpResponse res = signRequestAndExecute(req, account);
 	}
 	
 	public List<Follower> getFollowers (Account account) throws TentClientException {
