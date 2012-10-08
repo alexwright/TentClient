@@ -329,6 +329,10 @@ public class TentClient {
 		
 		StatusLine sl = res.getStatusLine();
 		if (sl.getStatusCode() > 400) {
+			try {
+				Log.e("tent-http-error", responseToString(res));
+			} catch (IOException e) {
+			}
 			String message = String.format("Error communicating with Tent server: (%s)", res.getStatusLine().toString());
 			throw new TentClientException(message);
 		}
