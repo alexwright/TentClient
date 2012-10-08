@@ -316,17 +316,7 @@ public class TentClient {
 	
 	private JsonReader signRequestAndGetReader (HttpUriRequest request, Account account) throws TentClientException
 	{
-		request.setHeader("Accept", TENT_MIME);
-		OAuth2.sign(request, account.macId, account.macKey);
-		
-		HttpResponse res;
-		try {
-			res = getHttpClient().execute(request);
-		}
-		catch (IOException e) {
-			throw new TentClientException("Error communicating with Tent server", e);
-		}
-		
+		HttpResponse res = signRequestAndExecute(request, account);
 		StatusLine sl = res.getStatusLine();
 		if (sl.getStatusCode() > 400) {
 			try {
@@ -345,6 +335,28 @@ public class TentClient {
 		}
 		
 		return new JsonReader(new InputStreamReader(is));
+	}
+	
+	private HttpResponse signRequestAndExecute (HttpUriRequest request, Account account) throws TentClientException {
+		request.setHeader("Accept", TENT_MIME);
+		OAuth2.sign(request, account.macId, account.macKey);
+		
+		HttpResponse res;
+		try {
+			res = getHttpClient().execute(request);
+		}
+		catch (IOException e) {
+			throw new TentClientException("Error communicating with Tent server", e);
+		}
+		return res;
+	}
+	
+	private StringEntity gsonStringEntity (Object object) throws TentClientException {
+		try {
+			return new StringEntity(new Gson().toJson(object));
+		} catch (UnsupportedEncodingException e) {
+			throw new TentClientException("Error while encoding request json", e);
+		}
 	}
 
 	private class DiscoveryClient {
