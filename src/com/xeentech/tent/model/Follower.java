@@ -10,6 +10,6 @@ public class Follower {
 	public Map<String, Object> permissions;
 	public long created_at;
 	public long updated_at;
-	public Map<String, Object> profile;
 	public List<String> types;
+	public Profile profile;
 }

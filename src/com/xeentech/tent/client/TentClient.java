@@ -117,12 +117,10 @@ public class TentClient {
 		try {
 			HttpResponse res = getHttpClient().execute(req);
 			String resBody = responseToString(res);
-			JSONObject profileJson = new JSONObject(resBody);
-			return Profile.fromJsonObject(profileJson);
+
+			return new Gson().fromJson(resBody, Profile.class);
 		}
 		catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -140,13 +138,11 @@ public class TentClient {
 		try {
 			HttpResponse res = getHttpClient().execute(req);
 			String resBody = responseToString(res);
-			JSONObject profileJson = new JSONObject(resBody);
-			return Profile.fromJsonObject(profileJson);
+
+			return new Gson().fromJson(resBody, Profile.class);
 		}
 		catch (IOException e) {
 			throw new TentClientException("Error making http request", e);
-		} catch (JSONException e) {
-			throw new TentClientException("Error parsing server's response", e);
 		}
 	}
 	
