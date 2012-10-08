@@ -10,9 +10,11 @@ import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -26,10 +28,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
 import com.xeentech.tent.model.Account;
 import com.xeentech.tent.model.AppInfo;
 import com.xeentech.tent.model.AuthorizationRequest;
 import com.xeentech.tent.model.AuthorizationResponse;
+import com.xeentech.tent.model.Follower;
 import com.xeentech.tent.model.Following;
 import com.xeentech.tent.model.Post;
 import com.xeentech.tent.model.Profile;
@@ -257,34 +261,46 @@ public class TentClient {
 		String postsUri = Uri.parse(account.serverUrl).buildUpon()
 				.appendPath("followings")
 				.build().toString();
-		
 		HttpGet req = new HttpGet(postsUri);
-		req.setHeader("Accept", TENT_MIME);
-		OAuth2.sign(req, account.macId, account.macKey);
 		
-		try {
-			HttpResponse res = getHttpClient().execute(req);
-			String resBody = responseToString(res);
-			
-			Gson gson = new Gson();
-			JsonParser parser = new JsonParser();
-			JsonArray jFollowing = parser.parse(resBody).getAsJsonArray();
-			
-			List<Following> following = new ArrayList<Following>();
-			for (int i=0,c=jFollowing.size(); i<c; i++) {
-				Following f = gson.fromJson(jFollowing.get(i), Following.class);
-				following.add(f);
-			}
-			return following;
-		} catch (IOException e) {
-			throw new TentClientException("Api error getting posts", e);
+		JsonReader reader = signRequestAndGetReader(req, account);
+		JsonArray jFollowing = new JsonParser().parse(reader).getAsJsonArray();
+		
+		Gson gson = new Gson();
+		List<Following> following = new ArrayList<Following>();
+		for (int i=0,c=jFollowing.size(); i<c; i++) {
+			Following f = gson.fromJson(jFollowing.get(i), Following.class);
+			following.add(f);
 		}
+		return following;
+	}
+	
+	public List<Follower> getFollowers (Account account) throws TentClientException {
+		String postsUri = Uri.parse(account.serverUrl).buildUpon()
+				.appendPath("followers")
+				.build().toString();
+		HttpGet req = new HttpGet(postsUri);
+		
+		JsonReader reader = signRequestAndGetReader(req, account);
+		JsonArray jFollowers = new JsonParser().parse(reader).getAsJsonArray();
+		
+		Gson gson = new Gson();
+		List<Follower> followers = new ArrayList<Follower>();
+		for (int i=0,c=jFollowers.size(); i<c; i++) {
+			Follower f = gson.fromJson(jFollowers.get(i), Follower.class);
+			followers.add(f);
+			Log.d("tent-client", "f: " + f.toString());
+		}
+		return followers;
 	}
 	
 	@SuppressWarnings("serial")
 	public class TentClientException extends Exception {
 		public TentClientException (String message, Throwable cause) {
 			super(message, cause);
+		}
+		public TentClientException (String message) {
+			super(message);
 		}
 	}
 
@@ -302,6 +318,35 @@ public class TentClient {
 			sb.append(line);
 		}
 		return sb.toString();
+	}
+	
+	private JsonReader signRequestAndGetReader (HttpUriRequest request, Account account) throws TentClientException
+	{
+		request.setHeader("Accept", TENT_MIME);
+		OAuth2.sign(request, account.macId, account.macKey);
+		
+		HttpResponse res;
+		try {
+			res = getHttpClient().execute(request);
+		}
+		catch (IOException e) {
+			throw new TentClientException("Error communicating with Tent server", e);
+		}
+		
+		StatusLine sl = res.getStatusLine();
+		if (sl.getStatusCode() > 400) {
+			String message = String.format("Error communicating with Tent server: (%s)", res.getStatusLine().toString());
+			throw new TentClientException(message);
+		}
+		
+		InputStream is;
+		try {
+			is = res.getEntity().getContent();
+		} catch (IOException e) {
+			throw new TentClientException("Unable to read form Tent servers response", e);
+		}
+		
+		return new JsonReader(new InputStreamReader(is));
 	}
 
 	private class DiscoveryClient {
