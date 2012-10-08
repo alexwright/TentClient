@@ -7,9 +7,10 @@ client-specific perspective.
 * Posting status types with `text` and or `location`.
 * Posting photo types with one or more images and a caption.
 * Pulling a basic feed of posts from an entities server.
+* Followers / Following.
+* Follow and unfollow.
 
 ## What's Up Next?
-* Followers / Following.
 * Better filtering of post feed/stream, ie since_id, types, entity etc.
 * Posting more types.
 
