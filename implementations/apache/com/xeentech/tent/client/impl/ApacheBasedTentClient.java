@@ -1,4 +1,4 @@
-package com.xeentech.tent.client;
+package com.xeentech.tent.client.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,6 +29,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
+import com.xeentech.tent.client.TentClient;
+import com.xeentech.tent.client.TentClientException;
 import com.xeentech.tent.model.Account;
 import com.xeentech.tent.model.AppInfo;
 import com.xeentech.tent.model.AuthorizationRequest;
@@ -42,7 +44,7 @@ import com.xeentech.tent.model.UploadAttachment;
 import android.net.Uri;
 import android.util.Log;
 
-public class TentClient {
+public class ApacheBasedTentClient implements TentClient {
 	static final String TENT_MIME = "application/vnd.tent.v0+json";
 
 	public List<Profile> discover(String entityUri) {
@@ -312,16 +314,6 @@ public class TentClient {
 		return followers;
 	}
 	
-	@SuppressWarnings("serial")
-	public class TentClientException extends Exception {
-		public TentClientException (String message, Throwable cause) {
-			super(message, cause);
-		}
-		public TentClientException (String message) {
-			super(message);
-		}
-	}
-
 	private HttpClient getHttpClient() {
 		return new DefaultHttpClient();
 	}
