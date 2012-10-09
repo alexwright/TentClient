@@ -21,12 +21,18 @@ public class OAuth2 {
 		Long ts = generateTs();
 		String nonce = generateNonce();
 		
+		String path = uri.getPath();
+		String qs = uri.getEncodedQuery();
+		if (qs != null) {
+			path += "?" + qs;
+		}
+		
 		StringBuilder sb = new StringBuilder();
 		sb
-			.append(generateTs().toString()).append("\n")
+			.append(ts).append("\n")
 			.append(nonce).append("\n")
 			.append(request.getRequestLine().getMethod()).append("\n")
-			.append(uri.getPath()).append("\n")
+			.append(path).append("\n")
 			.append(uri.getHost()).append("\n")
 			.append(port).append("\n")
 			.append("").append("\n"); // empty ext field;

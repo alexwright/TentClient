@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -226,9 +227,18 @@ public class TentClient {
 	}
 	
 	public List<Post> getPosts(Account account) throws TentClientException {
-		String postsUri = Uri.parse(account.serverUrl).buildUpon()
-				.appendPath("posts")
-				.build().toString();
+		return getPosts(account, null);
+	}
+	
+	public List<Post> getPosts(Account account, Map<String, String> filterParameters) throws TentClientException {
+		Uri.Builder builder = Uri.parse(account.serverUrl).buildUpon()
+				.appendPath("posts");
+		if (filterParameters != null) {
+			for (Map.Entry<String, String> param : filterParameters.entrySet()) {
+				builder.appendQueryParameter(param.getKey(), param.getValue());
+			}
+		}
+		String postsUri = builder.build().toString();
 		
 		HttpGet req = new HttpGet(postsUri);
 		JsonReader reader = signRequestAndGetReader(req, account);
