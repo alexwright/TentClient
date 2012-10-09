@@ -231,25 +231,15 @@ public class TentClient {
 				.build().toString();
 		
 		HttpGet req = new HttpGet(postsUri);
-		OAuth2.sign(req, account.macId, account.macKey);
-		
-		try {
-			HttpResponse res = getHttpClient().execute(req);
-			String resBody = responseToString(res);
-			
-			Gson gson = new Gson();
-			JsonParser parser = new JsonParser();
-			JsonArray jPosts = parser.parse(resBody).getAsJsonArray();
-			
-			List<Post> posts = new ArrayList<Post>();
-			for (int i=0,c=jPosts.size(); i<c; i++) {
-				Post p = gson.fromJson(jPosts.get(i), Post.class);
-				posts.add(p);
-			}
-			return posts;
-		} catch (IOException e) {
-			throw new TentClientException("Api error getting posts", e);
+		JsonReader reader = signRequestAndGetReader(req, account);
+		JsonArray jPosts = new JsonParser().parse(reader).getAsJsonArray();
+		Gson gson = new Gson();
+		List<Post> posts = new ArrayList<Post>();
+		for (int i=0,c=jPosts.size(); i<c; i++) {
+			Post p = gson.fromJson(jPosts.get(i), Post.class);
+			posts.add(p);
 		}
+		return posts;
 	}
 	
 	public List<Following> getFollowings (Account account) throws TentClientException {
