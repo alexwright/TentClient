@@ -1,4 +1,4 @@
-package com.xeentech.tent.client;
+package com.xeentech.tent.client.impl;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
