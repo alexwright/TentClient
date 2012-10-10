@@ -89,8 +89,6 @@ public class ApacheBasedTentClient implements TentClient {
 	
 	public AuthorizationResponse authorize(String appId, String code, Account account) throws TentClientException {
 		String apiUrl = Uri.parse(account.serverUrl).buildUpon()
-	public AuthorizationResponse authorize(String appId, String code, String serverUrl) throws TentClientException {
-		String apiUrl = Uri.parse(serverUrl).buildUpon()
 				.appendPath("apps")
 				.appendPath(appId)
 				.appendPath("authorizations")
