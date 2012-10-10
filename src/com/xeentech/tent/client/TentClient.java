@@ -16,7 +16,7 @@ public interface TentClient {
 	// Discovery and Authentication
 	public List<Profile> discover(String entityUri);
 	public AppInfo register(AppInfo appInfo, String serverUrl) throws TentClientException;
-	public AuthorizationResponse authorize(String appId, String code, String serverUrl) throws TentClientException;
+	public AuthorizationResponse authorize(String appId, String code, Account account) throws TentClientException;
 	
 	// Profile stuff
 	public Profile getProfile(String profileUrl);

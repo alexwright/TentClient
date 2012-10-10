@@ -87,6 +87,8 @@ public class ApacheBasedTentClient implements TentClient {
 		}
 	}
 	
+	public AuthorizationResponse authorize(String appId, String code, Account account) throws TentClientException {
+		String apiUrl = Uri.parse(account.serverUrl).buildUpon()
 	public AuthorizationResponse authorize(String appId, String code, String serverUrl) throws TentClientException {
 		String apiUrl = Uri.parse(serverUrl).buildUpon()
 				.appendPath("apps")
@@ -96,6 +98,8 @@ public class ApacheBasedTentClient implements TentClient {
 		HttpPost req = new HttpPost(apiUrl);
 		req.setHeader("Content-Type", TENT_MIME);
 		req.setHeader("Accept", TENT_MIME);
+		
+		OAuth2.sign(req, account.macId, account.macKey);
 		
 		AuthorizationRequest authReq = new AuthorizationRequest();
 		authReq.code = code;
