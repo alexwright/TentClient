@@ -127,6 +127,10 @@ public class ApacheBasedTentClient implements TentClient {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		catch (JsonSyntaxException e) {
+			e.printStackTrace();
+		}
+
 		return null;
 	}
 	
