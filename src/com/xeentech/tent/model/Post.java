@@ -6,6 +6,7 @@ import java.util.Map;
 public class Post {
 	public String type;
 	public String id;
+	public String entity;
 	
 	public List<String> licenses;
 	public Map<String, Object> permissions;
