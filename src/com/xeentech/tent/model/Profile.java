@@ -27,4 +27,6 @@ public class Profile {
 		public String bio;
 		public Map<String, Object> permissions;
 	}
+	
+	public Long localId;
 }
