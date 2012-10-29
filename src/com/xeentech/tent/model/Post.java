@@ -22,4 +22,5 @@ public class Post {
 	public static final String TENT_POST_TYPE_ALBUM = "https://tent.io/types/post/album/v0.1.0";
 	public static final String TENT_POST_TYPE_REPOST = "https://tent.io/types/post/repost/v0.1.0";
 	public static final String TENT_POST_TYPE_DELETE = "https://tent.io/types/post/delete/v0.1.0";
+	public static final String TENT_POST_TYPE_PROFILE = "https://tent.io/types/post/profile/v0.1.0";
 }
